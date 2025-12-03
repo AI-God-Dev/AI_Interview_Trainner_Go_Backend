@@ -1,86 +1,217 @@
 # AI Interview Trainer - Backend API
 
-Go backend for an AI-powered interview training platform. Built with Fiber.
+A Go backend API for an AI-powered interview training platform. Originally built for the Australian Public Service, but flexible enough to work for any industry.
+
+Built with [Fiber](https://gofiber.io/) - fast, flexible, and fun to work with.
+
+## What it does
+
+This API powers an interview training platform where users can practice with AI interviewers. It handles:
+- Real-time AI conversations (multiple providers)
+- Text-to-speech generation (streaming audio)
+- Speech-to-text transcription
+- User management and credit system
+- Authentication via Google OAuth
+
+## Quick Start
+
+```bash
+# Clone it
+git clone https://github.com/AI-God-Dev/AI_Interview_Trainner_Go_Backend.git
+cd AI_Interview_Trainner_Go_Backend
+
+# Set up environment
+cp env.example .env
+# Edit .env with your config (at minimum: DSN, JWT_SECRET, API_KEY)
+
+# Install deps and run
+go mod download
+go run .
+```
+
+Server runs on `http://localhost:8080` by default.
 
 ## Features
 
-- Multiple AI providers: OpenAI, Vertex AI, ElevenLabs, Unreal Speech
-- Text generation: GPT-3.5, GPT-4, Gemini Pro, custom assistants
-- Text-to-Speech: Multiple TTS providers with streaming
-- Speech-to-Text: OpenAI Whisper and Vertex AI
-- User management with credit system
-- JWT auth with Google OAuth
-- API key protection
+### AI Providers
+- **Text Generation**: OpenAI (GPT-3.5, GPT-4), Vertex AI (PaLM, Gemini Pro), custom assistants
+- **Text-to-Speech**: OpenAI TTS, ElevenLabs, Unreal Speech, Vertex AI
+- **Speech-to-Text**: OpenAI Whisper, Vertex AI
 
-## Setup
-
-1. Install Go 1.21+
-2. Copy `env.example` to `.env` and fill in your values
-3. Run `go mod download`
-4. Run `go run .`
-
-The server will start on `http://localhost:8080`
+### Core Features
+- User management with credit/token system
+- JWT authentication with Google OAuth
+- API key protection for endpoints
+- Streaming audio responses
+- Multiple AI model support per user
+- Session management
 
 ## Configuration
 
-Required env vars:
-- `DSN` - Database connection string
-- `JWT_SECRET` - Secret for JWT signing (use a strong value!)
-- `API_KEY` - API key for endpoint protection
+### Required Environment Variables
 
-See `env.example` for all options.
+You **must** set these:
 
-## API Docs
+- `DSN` - MySQL connection string (e.g., `user:pass@tcp(localhost:3306)/dbname?charset=utf8mb4&parseTime=True&loc=Local`)
+- `JWT_SECRET` - Secret key for JWT signing (generate a strong random string!)
+- `API_KEY` - API key for protecting endpoints (use a strong value)
 
-Swagger docs available at `/swagger/index.html` when running.
+### Optional but Recommended
+
+- `OPEN_AI_API_KEY` - For OpenAI features
+- `ELEVEN_LABS_API_KEY` - For ElevenLabs TTS
+- `UNREAL_SPEECH_API_KEY` - For Unreal Speech TTS
+- `VERTEX_AI_API_KEY` - For Vertex AI features
+- `GCLOUD_API_KEY` - For Google Cloud services (get via `gcloud auth print-access-token`)
+
+See `env.example` for the full list with descriptions.
+
+### Tips
+
+- For local dev, you can use a local MySQL instance or [PlanetScale](https://planetscale.com/) for a free cloud DB
+- Generate a strong `JWT_SECRET` with: `openssl rand -hex 32`
+- The `API_KEY` is checked on every request - make it long and random
+- Set `COOKIE_SECURE=false` for local development over HTTP
+
+## API Documentation
+
+Once the server is running, check out the Swagger docs:
+
+```
+http://localhost:8080/swagger/index.html
+```
+
+Note: Swagger docs are still being improved, some endpoints might not be fully documented yet.
+
+## Development
+
+### Using Make
+
+```bash
+make run       # Start the server
+make test      # Run tests
+make lint      # Check code quality
+make format    # Format code
+make build     # Build binary
+```
+
+### Without Make
+
+```bash
+go run .                    # Run
+go test ./...               # Test
+golangci-lint run           # Lint
+go fmt ./...                # Format
+go build -o bin/server .    # Build
+```
+
+### Hot Reload
+
+If you have [Air](https://github.com/cosmtrek/air) installed:
+
+```bash
+make dev
+# or
+air
+```
 
 ## Docker
+
+### Quick Start
 
 ```bash
 docker-compose up
 ```
 
-Or build manually:
+This will start the app with all the config from your `.env` file.
+
+### Manual Build
+
 ```bash
 docker build -t ai-interview-trainer .
 docker run -p 8080:8080 --env-file .env ai-interview-trainer
 ```
 
+The Dockerfile uses a multi-stage build with a distroless base image for security and minimal size.
+
 ## Project Structure
 
 ```
 app/
-  handlers/    # HTTP handlers
-  models/      # Data models
-  services/    # Business logic
+  handlers/    # HTTP request handlers
+  models/      # Data models (User, AI models, etc.)
+  services/    # Business logic (AI service, user service, etc.)
 pkg/
-  config/      # Config management
-  errors/      # Error handling
-  logger/      # Logging
-  middleware/  # HTTP middleware
+  config/      # Configuration management
+  errors/      # Custom error types
+  logger/      # Structured logging (zap)
+  middleware/  # HTTP middleware (auth, logging, recovery, etc.)
   routes/      # Route definitions
 platform/
-  database/    # DB connection
-```
-
-## Development
-
-```bash
-make run       # Run the app
-make test      # Run tests
-make lint      # Run linters
-make format    # Format code
+  database/    # Database connection and setup
 ```
 
 ## Deployment
 
-For Google Cloud Run:
+### Google Cloud Run
+
+The easiest way to deploy:
+
 ```bash
 gcloud run deploy --source .
 ```
 
-Make sure all env vars are set in your deployment environment.
+Make sure you've set all required environment variables in Cloud Run's configuration.
+
+### Other Platforms
+
+The app should work on any platform that supports Go:
+- AWS Lambda (with adapter)
+- Heroku
+- DigitalOcean App Platform
+- Railway
+- Fly.io
+
+Just make sure to:
+1. Set all required environment variables
+2. Expose port 8080 (or change `PORT` env var)
+3. Have a MySQL database accessible
+
+## Troubleshooting
+
+### Database Connection Issues
+
+- Check your `DSN` format matches: `user:pass@tcp(host:port)/dbname?params`
+- Make sure MySQL is running and accessible
+- Check firewall rules if connecting to remote DB
+
+### Authentication Not Working
+
+- Verify `JWT_SECRET` is set and matches what your frontend expects
+- Check `GOOGLE_OAUTH_CLIENT_ID` and `GOOGLE_OAUTH_CLIENT_SECRET` if using OAuth
+- Make sure `API_KEY` matches what your frontend sends in `x-api-key` header
+
+### AI Services Not Responding
+
+- Verify API keys are set correctly
+- Check API key permissions/quotas
+- For Vertex AI, you might need to run `gcloud auth application-default login` first
+
+## Contributing
+
+Found a bug? Have an idea? PRs welcome!
+
+1. Fork the repo
+2. Create a feature branch
+3. Make your changes
+4. Test it
+5. Submit a PR
 
 ## License
 
-[Add your license]
+[Add your license here]
+
+## Related
+
+- Frontend: [ai-interview-trainer-frontend](https://github.com/dcrebbin/ai-interview-trainer-frontend)
+- Demo: [YouTube](https://www.youtube.com/watch?v=ef2ivitjiBU)

@@ -88,12 +88,32 @@ Note: Swagger docs are still being improved, some endpoints might not be fully d
 ### Using Make
 
 ```bash
-make run       # Start the server
-make test      # Run tests
-make lint      # Check code quality
-make format    # Format code
-make build     # Build binary
+make run              # Start the server
+make test             # Run unit tests
+make test-integration # Run integration tests
+make test-all         # Run all tests
+make lint             # Check code quality
+make format           # Format code
+make build            # Build binary
 ```
+
+### Testing
+
+The project includes unit tests and integration tests:
+
+```bash
+# Run unit tests only
+go test -v ./pkg/... ./app/services/...
+
+# Run integration tests (requires test database)
+go test -v -tags=integration ./...
+
+# Run with coverage
+go test -v -race -coverprofile=coverage.out ./...
+go tool cover -html=coverage.out
+```
+
+See [ARCHITECTURE.md](ARCHITECTURE.md) for more details on the testing strategy.
 
 ### Without Make
 
@@ -150,6 +170,8 @@ pkg/
 platform/
   database/    # Database connection and setup
 ```
+
+For a detailed architecture overview, see [ARCHITECTURE.md](ARCHITECTURE.md).
 
 ## Deployment
 

@@ -53,7 +53,13 @@ func (h *UserHandler) UpdateUserSettings(c *fiber.Ctx) error {
 	if err := c.BodyParser(newUserSettings); err != nil {
 		return c.Status(400).SendString(err.Error())
 	}
-	userSettings := h.userService.UpdateUserSettings(email, newUserSettings)
+	userSettings, err := h.userService.UpdateUserSettings(email, newUserSettings)
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{
+			"error":   true,
+			"message": "failed to update user settings",
+		})
+	}
 	return c.JSON(userSettings)
 }
 
@@ -63,6 +69,12 @@ func (h *UserHandler) CreateUser(c *fiber.Ctx) error {
 	if err := c.BodyParser(user); err != nil {
 		return c.Status(400).SendString(err.Error())
 	}
-	createdUser := h.userService.CreateUser(user)
+	createdUser, err := h.userService.CreateUser(user)
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{
+			"error":   true,
+			"message": "failed to create user",
+		})
+	}
 	return c.JSON(createdUser)
 }

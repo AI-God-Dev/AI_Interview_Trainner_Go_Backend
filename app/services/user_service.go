@@ -55,24 +55,24 @@ func (s *UserService) GetUserSettingsByEmail(email string) user_model.UserSettin
 	return user.UserSettings
 }
 
-func (s *UserService) UpdateUserSettings(email string, newUserSettings *user_model.UserSettings) user_model.UserSettings {
+func (s *UserService) UpdateUserSettings(email string, newUserSettings *user_model.UserSettings) (user_model.UserSettings, error) {
 	var db = database.DBConn
 	var user user_model.User
 	result := db.Where("email = ?", email).First(&user).Select("llm_model", "stt_model", "tts_model", "auto_play_audio").Updates(newUserSettings)
 	if result.Error != nil {
-		panic(result.Error)
+		return user_model.UserSettings{}, result.Error
 	}
-	return *newUserSettings
+	return *newUserSettings, nil
 }
 
-func (s *UserService) CreateUser(user *user_model.InputUser) user_model.User {
+func (s *UserService) CreateUser(user *user_model.InputUser) (user_model.User, error) {
 	var db = database.DBConn
 	var newUser user_model.User
 	newUser.Email = user.Email
 	newUser.Credits = 300
 	result := db.Create(&newUser)
 	if result.Error != nil {
-		panic(result.Error)
+		return user_model.User{}, result.Error
 	}
-	return newUser
+	return newUser, nil
 }

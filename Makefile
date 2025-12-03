@@ -7,7 +7,12 @@ run:
 	@go run .
 
 test:
-	@go test -v ./...
+	@go test -v -race -coverprofile=coverage.out ./pkg/... ./app/services/...
+
+test-integration:
+	@go test -v -tags=integration -coverprofile=integration.out ./...
+
+test-all: test test-integration
 
 lint:
 	@golangci-lint run

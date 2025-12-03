@@ -233,7 +233,15 @@ func handleLoginCallback(jwtSecret string, appLogger *logger.Logger) fiber.Handl
 		retrievedUser := userService.GetUserByEmail(email)
 		if retrievedUser.Email == "" {
 			newUser := user_model.InputUser{Email: email}
-			retrievedUser = userService.CreateUser(&newUser)
+			created, err := userService.CreateUser(&newUser)
+			if err != nil {
+				appLogger.Error("failed to create user", zap.Error(err), zap.String("email", email))
+				return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+					"error":   true,
+					"message": "failed to create user",
+				})
+			}
+			retrievedUser = created
 			appLogger.Info("new user created", zap.String("email", email))
 		}
 

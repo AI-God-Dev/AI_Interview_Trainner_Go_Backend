@@ -26,7 +26,7 @@ const (
 	ElevenLabsAmericanAccent   = "ErXwobaYiN019PkySvjV"
 	ElevenLabsAustralianAccent = "IKne3meq5aSn9XLyUdCD"
 	Role                       = "You are highly skilled software engineer for a big tech company. You're currently tutoring a candidate for a SWE (Software Engineer) role in a mock interview scenario. You are well versed in algorithms and data structures and can assist and provide feedback. Be short and concise with your responses. Never respond with more than 40 words."
-	// "You are a highly skilled tutor to help train people to interview for the Australian Public Service. You are well versed in the Australian Public Servant Code of Conduct. You have memorized the Integrated Learning System (ILS) and can assist and provide feedback on any candidate from APS1-APS6, EL1-EL2 and SES Band 1 - SES Band 3.  Never respond with more than 40 words."
+	// TODO: add APS role prompt back if needed
 	OpenAiCompletionsEndpoint     = "https://api.openai.com/v1/chat/completions"
 	OpenAiThreadsEndpoint         = "https://api.openai.com/v1/threads/runs"
 	OpenAiSingleThreadEndpoint    = "https://api.openai.com/v1/threads/%s/runs/%s/steps"
@@ -42,6 +42,13 @@ const (
 
 type AiService struct {
 	userService *UserService
+}
+
+// NewAiService creates a new AI service instance
+func NewAiService(userService *UserService) *AiService {
+	return &AiService{
+		userService: userService,
+	}
 }
 
 func (s *AiService) AiCreateMessage(c *fiber.Ctx, ai *ai_model.MessageReceived) (err error) {
@@ -143,7 +150,6 @@ func (s *AiService) OpenAiCreateThreadForAssistant(c *fiber.Ctx, ai *ai_model.Me
 	agent.JSON(jsonBody)
 
 	_, body, _ := agent.Bytes()
-	println(string(body))
 
 	var openAiThreadResponse ai_model.OpenAiThreadResponse
 	err = json.Unmarshal(body, &openAiThreadResponse)
@@ -191,7 +197,6 @@ Loop:
 				if len(threadRunStepResponse.Data) > 0 && threadRunStepResponse.Data[0].StepDetails.MessageCreation.MessageID != "" {
 					mu.Lock()
 					messageId = threadRunStepResponse.Data[0].StepDetails.MessageCreation.MessageID
-					println(messageId)
 					mu.Unlock()
 					cancel()
 					return
@@ -561,7 +566,7 @@ func (s *AiService) VertexAiCreateTranscription(c *fiber.Ctx) (err error) {
 }
 
 func validateToken(tokenString string) (*jwt.Token, error) {
-	// Not in use lol
+	// TODO: implement proper token validation
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodRSA); !ok {
 			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
@@ -589,7 +594,7 @@ func validateToken(tokenString string) (*jwt.Token, error) {
 }
 
 func getIdToken() (*oauth2.Token, error) {
-	// Not in use lol
+	// TODO: implement OAuth token generation
 	data, err := os.ReadFile("./google.json")
 	if err != nil {
 		return nil, fmt.Errorf("unable to read the key file: %v", err)
@@ -600,7 +605,6 @@ func getIdToken() (*oauth2.Token, error) {
 	if err != nil {
 		return nil, fmt.Errorf("unable to generate token: %v", err)
 	}
-	println(tokenSource)
 	token, err := tokenSource.TokenSource.Token()
 	return token, nil
 }

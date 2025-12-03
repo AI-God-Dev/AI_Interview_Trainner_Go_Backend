@@ -1,68 +1,86 @@
-# AI Interview Trainer - API
+# AI Interview Trainer - Backend API
 
-## Using Go Fiber
+Go backend for an AI-powered interview training platform. Built with Fiber.
 
-**DEMO:** https://www.youtube.com/watch?v=ef2ivitjiBU
+## Features
 
-_Frontend:_ https://github.com/dcrebbin/ai-interview-trainer-frontend
- 
-This api is for Up It APS made with [Go Fiber](https://docs.gofiber.io/) 
- 
-Up it APS is a WIP AI powered interview training platform for the Australian Public Service
-
-However, can be used as a baseline to create an interview training platform for any industry. 
-
-## AI Providers Supported
-
-_Note:_ Vertex AI isn't fully supported as proper auth hasn't been integrated. However local testing can occur via a hacky workaround mentioned below
-
-### Text Generation
-
-- [OpenAi (GPT3.5, GPT4, etc)](https://platform.openai.com/docs/api-reference/chat)
-- [Vertex (Palm, Gemini Pro etc)](https://console.cloud.google.com/vertex-ai/generative)
-
-### Text to Speech
-
-- [OpenAi (TTS 1, TTS 1 HD)](https://platform.openai.com/docs/api-reference/audio/createSpeech)
-- [Vertex](https://console.cloud.google.com/vertex-ai/generative)
-- [ElevenLabs](https://elevenlabs.io/docs/api-reference/text-to-speech)
-- [Unreal Speech](https://docs.unrealspeech.com/)
-
-### Speech to Text
-
-- [OpenAi (Whisper 1)](https://platform.openai.com/docs/api-reference/audio/createTranscription)
-- [Vertex](https://console.cloud.google.com/vertex-ai/generative)
+- Multiple AI providers: OpenAI, Vertex AI, ElevenLabs, Unreal Speech
+- Text generation: GPT-3.5, GPT-4, Gemini Pro, custom assistants
+- Text-to-Speech: Multiple TTS providers with streaming
+- Speech-to-Text: OpenAI Whisper and Vertex AI
+- User management with credit system
+- JWT auth with Google OAuth
+- API key protection
 
 ## Setup
 
-1. [Install GO](https://go.dev/doc/install) 
+1. Install Go 1.21+
+2. Copy `env.example` to `.env` and fill in your values
+3. Run `go mod download`
+4. Run `go run .`
 
-1. [Install gcloud CLI](https://cloud.google.com/sdk/docs/install)
+The server will start on `http://localhost:8080`
 
-1. Create a gcloud project and enable a bunch of things, etc etc
+## Configuration
 
-1. Go get
+Required env vars:
+- `DSN` - Database connection string
+- `JWT_SECRET` - Secret for JWT signing (use a strong value!)
+- `API_KEY` - API key for endpoint protection
 
-1. Create a .env using the env.example file
+See `env.example` for all options.
 
-## Swagger
+## API Docs
 
-_Not fully implemented_
+Swagger docs available at `/swagger/index.html` when running.
 
-http://127.0.0.1:8080/swagger/index.html
+## Docker
 
-## Authentication
+```bash
+docker-compose up
+```
 
-This allows you to deploy to gcp
+Or build manually:
+```bash
+docker build -t ai-interview-trainer .
+docker run -p 8080:8080 --env-file .env ai-interview-trainer
+```
 
-> gcloud auth login
+## Project Structure
 
-Need to use auth quickly to use vertex ai?
+```
+app/
+  handlers/    # HTTP handlers
+  models/      # Data models
+  services/    # Business logic
+pkg/
+  config/      # Config management
+  errors/      # Error handling
+  logger/      # Logging
+  middleware/  # HTTP middleware
+  routes/      # Route definitions
+platform/
+  database/    # DB connection
+```
 
-> gcloud auth print-access-token
+## Development
 
-## Deploy
+```bash
+make run       # Run the app
+make test      # Run tests
+make lint      # Run linters
+make format    # Format code
+```
 
-(make sure to be within the root directory ./)
+## Deployment
 
-> gcloud run deploy --source .
+For Google Cloud Run:
+```bash
+gcloud run deploy --source .
+```
+
+Make sure all env vars are set in your deployment environment.
+
+## License
+
+[Add your license]

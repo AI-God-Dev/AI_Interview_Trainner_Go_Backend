@@ -10,13 +10,14 @@ import (
 )
 
 func AiRoutes(api fiber.Router, store *session.Store) {
-	aiService := &service.AiService{}
+	userService := service.NewUserService()
+	aiService := service.NewAiService(userService)
 	helperService := &service.HelperService{}
 	aiHandler := handler.NewAiHandler(aiService, helperService, store)
 	ai := api.Group("/ai")
 
 	ai.Post("/generate-audio", aiHandler.GenerateChunkedAudio)
 	ai.Post("/chunk", aiHandler.ChunkString)
-	ai.Post("/message", aiHandler.ReceiveMessage, middleware.LoggingMiddleware)
+	ai.Post("/message", aiHandler.ReceiveMessage)
 	ai.Post("/speech-to-text", aiHandler.WhisperGenerateTextFromSpeech)
 }

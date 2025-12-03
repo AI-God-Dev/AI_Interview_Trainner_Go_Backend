@@ -1,23 +1,31 @@
 package middleware
 
 import (
-	"log"
-	"os"
+	"up-it-aps-api/pkg/errors"
 
 	"github.com/gofiber/fiber/v2"
+	"go.uber.org/zap"
 )
 
-// This or another middleware function needs to be checking the validity of the jwt
-func WithAuthenticatedUserApi(c *fiber.Ctx) error {
-	log.Println("WithAuthenticatedUserApi")
-	apiKey := c.Get("x-api-key")
-	log.Println("Api Key is " + apiKey)
-	if apiKey != os.Getenv("API_KEY") {
-		log.Println("Wrong API key")
-		return c.Status(401).JSON(fiber.Map{
-			"message": "Unauthorized",
-		})
+func APIKeyAuth(apiKey string, logger *zap.Logger) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		requestKey := c.Get("x-api-key")
+		if requestKey == "" {
+			logger.Warn("Missing API key",
+				zap.String("path", c.Path()),
+				zap.String("ip", c.IP()),
+			)
+			return errors.ErrUnauthorized
+		}
+
+		if requestKey != apiKey {
+			logger.Warn("Invalid API key",
+				zap.String("path", c.Path()),
+				zap.String("ip", c.IP()),
+			)
+			return errors.ErrUnauthorized
+		}
+
+		return c.Next()
 	}
-	log.Println("Correct API key")
-	return c.Next()
 }

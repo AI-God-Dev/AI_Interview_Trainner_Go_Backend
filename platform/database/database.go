@@ -5,5 +5,5 @@ import (
 )
 
 var (
-	DBConn *gorm.DB
+	DBConn *gorm.DB // TODO: refactor to DI later
 )

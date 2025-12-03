@@ -9,9 +9,11 @@ require (
 	github.com/gofiber/fiber/v2 v2.50.0
 	github.com/gofiber/session v1.2.5
 	github.com/gofiber/swagger v0.1.14
+	github.com/google/uuid v1.3.1
 	github.com/jinzhu/gorm v1.9.16
 	github.com/joho/godotenv v1.5.1
 	github.com/swaggo/swag v1.16.2
+	go.uber.org/zap v1.26.0
 	golang.org/x/oauth2 v0.13.0
 	gorm.io/driver/mysql v1.5.2
 	gorm.io/gorm v1.25.5

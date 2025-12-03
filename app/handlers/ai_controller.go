@@ -19,7 +19,12 @@ type AiHandler struct {
 }
 
 func NewAiHandler(aiService *service.AiService, helperService *service.HelperService, store *session.Store) *AiHandler {
-	return &AiHandler{aiService: aiService, helperService: helperService, store: store}
+	return &AiHandler{
+		aiService:     aiService,
+		helperService: helperService,
+		userService:   aiService.userService, // Get userService from aiService
+		store:         store,
+	}
 }
 
 // Placeholder
@@ -43,8 +48,8 @@ func (h *AiHandler) ChunkString(c *fiber.Ctx) error {
 	return h.helperService.ChunkData(c, chunkedString)
 }
 
-// There's definitely a better way to structure this
 func (h *AiHandler) GenerateChunkedAudio(ctx *fiber.Ctx) (err error) {
+	// TODO: refactor this, it's getting messy
 	log.Println("GenerateChunkedAudio")
 	message := new(ai_model.MessageReceived)
 	email := ctx.Query("email")
@@ -62,7 +67,7 @@ func (h *AiHandler) GenerateChunkedAudio(ctx *fiber.Ctx) (err error) {
 			var audio = h.aiService.UnrealSpeechGenerateAudio([]byte(message.Message), email)
 			_, err := w.Write(audio)
 			if err != nil {
-				print(err)
+				log.Printf("Error writing audio: %v", err)
 				return
 			}
 			_ = w.Flush()
@@ -94,7 +99,7 @@ func (h *AiHandler) GenerateChunkedAudio(ctx *fiber.Ctx) (err error) {
 				err = w.Flush()
 				log.Println("Sending chunk")
 				if err != nil {
-					print(err)
+					log.Printf("Error flushing chunk: %v", err)
 					doneCh <- false
 					return
 				}

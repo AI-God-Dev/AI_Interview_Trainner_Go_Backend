@@ -15,22 +15,23 @@ func NewDebuggingHandler() *DebuggingHandler {
 	return &DebuggingHandler{}
 }
 func (h *DebuggingHandler) Debugging(c *fiber.Ctx) error {
+	// quick debug endpoint, remove in prod
 	request := c.Request()
 	response := c.Response()
 	contentType := request.Header.ContentType()
-
 	contentLength := request.Header.ContentLength()
-	println(contentType)
-	println(contentLength)
 
 	multipartForm, err := c.MultipartForm()
-	println(multipartForm)
 	if err != nil {
-		print(err)
+		return c.Status(400).JSON(fiber.Map{"error": err.Error()})
 	}
-	println(request)
-	println(response)
-	return c.Status(response.StatusCode()).Send([]byte(contentType))
+
+	return c.JSON(fiber.Map{
+		"contentType":    string(contentType),
+		"contentLength":  contentLength,
+		"hasMultipart":   multipartForm != nil,
+		"statusCode":     response.StatusCode(),
+	})
 }
 
 func (h *DebuggingHandler) GetUserDetails(c *fiber.Ctx) error {

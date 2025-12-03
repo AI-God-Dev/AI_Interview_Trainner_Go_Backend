@@ -6,7 +6,6 @@ import (
 )
 
 type UserService struct {
-	// ... other fields, like a database connection
 }
 
 func NewUserService() *UserService {
@@ -63,8 +62,6 @@ func (s *UserService) UpdateUserSettings(email string, newUserSettings *user_mod
 	if result.Error != nil {
 		panic(result.Error)
 	}
-
-	println(result.RowsAffected)
 	return *newUserSettings
 }
 
@@ -77,6 +74,5 @@ func (s *UserService) CreateUser(user *user_model.InputUser) user_model.User {
 	if result.Error != nil {
 		panic(result.Error)
 	}
-	println(result.Row())
 	return newUser
 }
